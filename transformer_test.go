@@ -8,18 +8,45 @@ import (
 )
 
 func TestStem(t *testing.T) {
-	words := []string{
-		"he",
+	input := []string{
+		"He",
 		"intends",
 		"to",
 		"be",
 		"doing",
 		"some",
 		"skiing",
+		"and",
+		"imbibing",
+		"Açaí",
+		"deliciously",
+		".",
 	}
 
-	for _, word := range words {
-		stemmed, _, _ := transform.Bytes(stemmer.English, []byte(word))
-		t.Logf("%q", stemmed)
+	expected := []string{
+		"He",
+		"intend",
+		"to",
+		"be",
+		"do",
+		"some",
+		"ski",
+		"and",
+		"imbib",
+		"Açaí",
+		"delici",
+		".",
+	}
+
+	for i, word := range input {
+		stemmed, _, err := transform.Bytes(stemmer.English, []byte(word))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if string(stemmed) != expected[i] {
+			t.Fatalf("expected %q, got %q", expected[i], stemmed)
+
+		}
 	}
 }

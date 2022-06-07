@@ -1,6 +1,10 @@
 package stemmer
 
 import (
+	"errors"
+	"fmt"
+	"unicode/utf8"
+
 	"github.com/blevesearch/snowballstem"
 	"golang.org/x/text/transform"
 )
@@ -21,6 +25,8 @@ type Transformer struct {
 	stem StemFunc
 }
 
+var ErrInvalidUtf8 = errors.New("stemming resulted in invalid UTF-8")
+
 func (t *Transformer) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err error) {
 	env := snowballstem.NewEnv(string(src))
 
@@ -28,14 +34,16 @@ func (t *Transformer) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, er
 
 	t.stem(env)
 
-	stemmed := env.Current()
+	stemmed := []byte(env.Current())
 	nDst = len(stemmed)
 
-	for i := range stemmed {
-		dst[i] = stemmed[i]
+	if !utf8.Valid(stemmed) {
+		err = fmt.Errorf("stemmed %q, resulting in %q: %w", string(src), stemmed, ErrInvalidUtf8)
 	}
 
-	return nDst, nSrc, nil
+	copy(dst, src)
+
+	return nDst, nSrc, err
 }
 
 func (t *Transformer) Reset() {}
