@@ -1,15 +1,12 @@
 package stemmer
 
 import (
-	"errors"
-	"fmt"
-	"unicode/utf8"
+	"sync"
 
 	"github.com/blevesearch/snowballstem"
 	"golang.org/x/text/transform"
 )
 
-// ensure Transformer implements transform.Transformer from golang.org/x/text/
 //lint:ignore U1000 unused
 var check transform.Transformer = &Transformer{}
 
@@ -25,11 +22,18 @@ type Transformer struct {
 	stem StemFunc
 }
 
-var ErrInvalidUtf8 = errors.New("stemming resulted in invalid UTF-8")
+// looks like a premature optimization, maybe it is, but env
+// is stateful and I don't want Transformer to be
+var envPool = sync.Pool{
+	New: func() interface{} {
+		return snowballstem.NewEnv("")
+	},
+}
 
 func (t *Transformer) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err error) {
-	env := snowballstem.NewEnv(string(src))
+	env := envPool.Get().(*snowballstem.Env)
 
+	env.SetCurrent(string(src))
 	nSrc = len(src)
 
 	t.stem(env)
@@ -37,12 +41,9 @@ func (t *Transformer) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, er
 	stemmed := []byte(env.Current())
 	nDst = len(stemmed)
 
-	if !utf8.Valid(stemmed) {
-		err = fmt.Errorf("stemmed %q, resulting in %q: %w", string(src), stemmed, ErrInvalidUtf8)
-	}
-
 	copy(dst, src)
 
+	envPool.Put(env)
 	return nDst, nSrc, err
 }
 

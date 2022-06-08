@@ -50,3 +50,14 @@ func TestStem(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkStem(b *testing.B) {
+	in := []byte("deliciously")
+
+	for i := 0; i < b.N; i++ {
+		_, _, err := transform.Bytes(stemmer.English, in)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
