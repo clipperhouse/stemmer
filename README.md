@@ -2,6 +2,8 @@
 
 Package `stemmer` is a set of Snowball language stemmers, implemented as `transform.Transformer` (see [golang.org/x/text/](https://golang.org/x/text/)). Implementing `transform.Transformer` allows use with the `x/text` ecosystem.
 
+([Stemming](https://en.wikipedia.org/wiki/Stemming) is the process of trimming words down to their roots, usually for searching purposes.)
+
 My narrower motivation is to offer stemming in [this Unicode text segmenter](https://pkg.go.dev/github.com/clipperhouse/uax29/words). To use a stemmer in that package, you will call the `Transform` method on a `Segmenter` or `Scanner`, along the lines of:
 
 ```go
