@@ -17,3 +17,8 @@ segmenter.Transform(stemmer.English)
 ```
 
 This `stemmer` package is a thin layer over [this Snowball package](https://github.com/blevesearch/snowballstem), thanks to Bleve.
+
+### Supported languages
+
+Arabic, Danish, Dutch, English, Finnish, French, German, Hungarian, Irish, Italian, Norwegian, Porter, Portuguese, Romanian, Russian, Spanish, Swedish, Tamil, Turkish
+
